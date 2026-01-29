@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    @page { size: A4 portrait; margin: 0; }
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 0; 
+      padding: 0; 
+      -webkit-print-color-adjust: exact; 
+      print-color-adjust: exact;
+      width: 210mm; 
+      height: 297mm; 
+      position: relative; /* Necessário para o QR Code fixo */
+    }
+
+    /* --- MARCADORES (Fiduciais) --- */
+    .marcador { position: absolute; width: 30px; height: 30px; border-color: #000; border-style: solid; border-width: 0; z-index: 999; }
+    .top-left { top: 10mm; left: 10mm; border-top-width: 6px; border-left-width: 6px; }
+    .top-right { top: 10mm; right: 10mm; border-top-width: 6px; border-right-width: 6px; }
+    .bottom-left { bottom: 5mm; left: 10mm; border-bottom-width: 6px; border-left-width: 6px; }
+    .bottom-right { bottom: 5mm; right: 10mm; border-bottom-width: 6px; border-right-width: 6px; }
+
+    /* --- QR CODE NOVO (FIXO NO CANTO) --- */
+    /* Adicionei isso para ele sair de cima do texto e ir pro canto do papel */
+    .qr-corner-fixed {
+        position: absolute;
+        top: 13mm;    /* Alinhado perto do marcador superior */
+        right: 13mm;  /* Alinhado perto do marcador direito */
+        width: 17mm;  /* Tamanho menorzinho */
+        z-index: 1000;
+    }
+    .qr-img { width: 100%; height: auto; border: 1px solid #000; display: block; background: white; }
+
+    /* --- CONTAINER --- */
+    .container { padding: 20mm 15mm 10mm 15mm; }
+
+    /* --- CABEÇALHO --- */
+    .header-wrapper {
+      position: relative;
+      text-align: center;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+    
+    /* Logo agora aponta para a pasta assets */
+    .brasao-img { width: 60px; display: block; margin: 0 auto 5px auto; }
+    
+    .header-text h1 { font-size: 14px; font-weight: bold; margin: 2px 0; text-transform: uppercase; }
+    .header-text h2 { font-size: 11px; margin: 2px 0; font-weight: normal; }
+    
+    /* --- DADOS DO SERVIDOR (SEU LAYOUT ORIGINAL) --- */
+    .dados-grid {
+      display: grid;
+      grid-template-columns: 2.5fr 1fr 1fr; 
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+    .dados-linha-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    .campo-box {
+      border: 1px solid #000;
+      display: flex;
+      flex-direction: column;
+    }
+    .label { 
+      font-size: 8px; 
+      font-weight: bold; 
+      background-color: #e0e0e0; 
+      padding: 2px 5px;
+      border-bottom: 1px solid #ccc;
+    }
+    .valor { 
+      font-size: 11px; 
+      font-weight: bold; 
+      text-transform: uppercase; 
+      padding: 4px 5px;
+      white-space: nowrap; 
+      overflow: hidden;
+      min-height: 15px; 
+    }
+
+    /* --- TABELA --- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+      border: 1px solid #000;
+    }
+    th {
+      border: 1px solid #000; padding: 3px; background-color: #f0f0f0;
+      text-align: center;      /* Centraliza na Horizontal (Esquerda/Direita) */
+      vertical-align: middle;  /* Centraliza na Vertical (Cima/Baixo) */
+      }
+    td { border: 1px solid #000; height: 19px; text-align: center; color: #000; }
+
+    .col-dia { width: 4%; font-weight: bold; }
+    .col-sem { width: 12%; font-size: 9px; text-align: center; padding-left: 3px; }
+    .col-hora { width: 6.5%; } 
+    .col-ass { width: 51.5%; } 
+    .col-cod { width: 6.5%; }
+
+    .linha-fds { background-color: #d9d9d9 !important; -webkit-print-color-adjust: exact; }
+    .celula-mesclada { font-weight: bold; font-size: 11px; color: #333; letter-spacing: 1px; }
+
+    /* --- RODAPÉ --- */
+    .assinatura-area {
+      margin-top: 50px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .campo-chefia { width: 45%; border-top: 1px solid #000; text-align: center; padding-top: 2px; }
+
+  </style>
+</head>
+<body>
+
+  <div class="marcador top-left"></div>
+  <div class="marcador top-right"></div>
+  <div class="marcador bottom-left"></div>
+  <div class="marcador bottom-right"></div>
+
+  <div class="qr-corner-fixed">
+      {% if qrCodeUrl %}
+          <img src="{{ qrCodeUrl }}" class="qr-img">
+      {% endif %}
+  </div>
+
+  <div class="container">
+    
+    <div class="header-wrapper">
+      <img src="assets/brasao.png" class="brasao-img">
+      
+      <div class="header-text">
+        <h1>Governo do Estado do Pará</h1>
+        <h1>Secretaria de Estado de Educação</h1>
+      </div>
+      </div>
+
+    <div class="dados-grid">
+      <div class="campo-box">
+        <span class="label">NOME DO SERVIDOR</span>
+        <span class="valor">{{ dados.nome }}</span>
+      </div>
+      <div class="campo-box">
+        <span class="label">MATRÍCULA</span>
+        <span class="valor">{{ dados.matricula }}</span>
+      </div>
+      <div class="campo-box">
+        <span class="label">MÊS/ANO</span>
+        <span class="valor">{{ mesAno }}</span>
+      </div>
+    </div>
+
+    <div class="dados-grid dados-linha-2">
+      <div class="campo-box">
+        <span class="label">CARGO / FUNÇÃO</span>
+        <span class="valor">{{ dados.cargo }}</span>
+      </div>
+      <div class="campo-box">
+        <span class="label">LOTAÇÃO / SETOR</span>
+        <span class="valor">{{ dados.lotacao }}</span>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th rowspan="2">DIA</th>
+          <th rowspan="2">SEMANA</th>
+          <th rowspan="2" class="col-hora">ENTRADA</th>
+          <th colspan="2">INTERVALO</th>
+          <th rowspan="2" class="col-hora">SAÍDA</th>
+          <th rowspan="2">ASSINATURA</th>
+          <th rowspan="2" class="col-cod">CÓDIGO</th>
+        </tr>
+        <tr>
+          <th class="col-hora">SAÍDA</th>
+          <th class="col-hora">RETORNO</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for dia in dias %}
+          <tr class="{{ '' if dia.ehUtil else 'linha-fds' }}">
+            
+            <td class="col-dia">{{ dia.dia }}</td>
+            
+            {% if dia.ehUtil %}
+                <td class="col-sem">{{ dia.semana }}</td>
+                <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> 
+            {% else %}
+                <td colspan="7" class="celula-mesclada">
+                  {{ dia.textoMesclado }}
+                </td>
+            {% endif %}
+
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="assinatura-area">
+      <div style="font-size: 11px; width: 30%;">
+        <b>FALTAS:</b> ____________
+      </div>
+      <div class="campo-chefia">
+        <b style="font-size: 10px;">ASSINATURA E CARIMBO DA CHEFIA IMEDIATA</b>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
