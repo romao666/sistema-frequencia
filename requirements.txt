@@ -1,0 +1,8 @@
+passlib
+streamlit
+pandas
+psycopg2-binary
+sqlalchemy
+qrcode[pil]
+jinja2
+weasyprint
