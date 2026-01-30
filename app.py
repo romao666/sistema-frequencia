@@ -4,6 +4,13 @@ import pandas as pd
 import zipfile
 import io
 
+# --- DEBUG TEMPORÁRIO (Apague depois de funcionar) ---
+try:
+    url_banco = st.secrets["DATABASE_URL"]
+    st.warning(f"O sistema está tentando conectar em: {url_banco}")
+except Exception as e:
+    st.error(f"Não consegui ler os secrets: {e}")
+
 # --- CONFIGURAÇÃO INICIAL E CORREÇÃO DE DLL (GTK3) ---
 gtk3_folder = r"C:\Program Files\GTK3-Runtime Win64\bin"
 if os.path.exists(gtk3_folder):
@@ -254,4 +261,5 @@ else:
     if st.session_state['user']['role'] == 'master':
         master_dashboard()
     else:
+
         admin_dashboard()
