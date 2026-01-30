@@ -4,6 +4,8 @@ import pandas as pd
 import zipfile
 import io
 
+# --- 1. IMPORTAÇÃO DO NOVO MÓDULO ---
+from src.admin_panel import render_admin_panel 
 
 # --- CONFIGURAÇÃO INICIAL E CORREÇÃO DE DLL (GTK3) ---
 gtk3_folder = r"C:\Program Files\GTK3-Runtime Win64\bin"
@@ -47,64 +49,8 @@ def login_screen():
             else:
                 st.error("Usuário ou senha incorretos.")
 
-# --- DASHBOARD MASTER ---
-def master_dashboard():
-    st.title("Painel Master 👑")
-    
-    tab1, tab2, tab3 = st.tabs(["👥 Gestão de Admins", "📂 Base de Dados (CSV)", "📊 Visão Geral"])
-    
-    # ABA 1: CRIAR ADMINS
-    with tab1:
-        col_form, col_list = st.columns([1, 2])
-        
-        with col_form:
-            st.subheader("Novo Admin")
-            new_user = st.text_input("Login (Ex: joao.gabinete)")
-            new_pass = st.text_input("Senha Inicial")
-            new_setor = st.text_input("Nome do Setor (Ex: GABINETE)")
-            
-            if st.button("Cadastrar Admin"):
-                if new_user and new_pass and new_setor:
-                    ok, msg = criar_usuario(new_user, new_pass, new_setor)
-                    if ok: st.success(msg)
-                    else: st.error(msg)
-                else:
-                    st.warning("Preencha todos os campos.")
-
-        with col_list:
-            st.subheader("Admins Ativos")
-            df_admins = listar_usuarios()
-            if not df_admins.empty:
-                st.dataframe(df_admins, use_container_width=True)
-                
-                # Exclusão simples
-                user_to_delete = st.selectbox("Selecione para excluir:", df_admins['username'])
-                if st.button(f"Excluir {user_to_delete}"):
-                    excluir_usuario(user_to_delete)
-                    st.rerun()
-            else:
-                st.info("Nenhum admin cadastrado.")
-
-    # ABA 2: UPLOAD CSV (A MESMA DE ANTES)
-    with tab2:
-        st.info("Upload da base bruta (SIGE/ERGON). Isso substitui a base atual.")
-        uploaded_file = st.file_uploader("Arquivo CSV", type="csv")
-        if uploaded_file:
-            if st.button("PROCESSAR E SALVAR BASE"):
-                try:
-                    df = pd.read_csv(uploaded_file, sep=',', encoding='latin-1')
-                    # Fallback para ponto e vírgula
-                    if 'MATRICULA' not in df.columns:
-                        uploaded_file.seek(0)
-                        df = pd.read_csv(uploaded_file, sep=';', encoding='latin-1')
-                    
-                    ok, msg = import_csv_to_db(df)
-                    if ok: st.success(msg)
-                    else: st.error(msg)
-                except Exception as e:
-                    st.error(f"Erro: {e}")
-
-# --- DASHBOARD ADMIN (O USUÁRIO FINAL) ---
+# --- DASHBOARD ADMIN (O USUÁRIO FINAL - SETOR) ---
+# (Mantivemos esta função aqui pois é a visão do usuário comum)
 def admin_dashboard():
     user = st.session_state['user']
     st.title(f"Setor: {user['setor']}")
@@ -112,7 +58,7 @@ def admin_dashboard():
     
     tab_equipe, tab_gerar = st.tabs(["🔍 Montar Equipe", "🖨️ Gerar Frequências"])
     
-    # ABA 1: BUSCAR (Igual ao anterior)
+    # ABA 1: BUSCAR
     with tab_equipe:
         st.markdown("#### Buscar Servidor na Base Geral")
         col_busca, col_btn = st.columns([3, 1])
@@ -252,9 +198,10 @@ else:
             st.session_state['logged_in'] = False
             st.rerun()
             
+    # --- 2. AQUI ACONTECE O ROTEAMENTO INTELIGENTE ---
     if st.session_state['user']['role'] == 'master':
-        master_dashboard()
+        # Chama a função do novo arquivo
+        render_admin_panel()
     else:
-
+        # Chama a função local
         admin_dashboard()
-
