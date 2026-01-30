@@ -3,7 +3,6 @@ import streamlit as st
 import pandas as pd
 import zipfile
 import io
-from src.admin_panel import render_admin_panel
 
 # --- CONFIGURAÇÃO INICIAL E CORREÇÃO DE DLL (GTK3) ---
 gtk3_folder = r"C:\Program Files\GTK3-Runtime Win64\bin"
@@ -257,3 +256,4 @@ else:
     else:
 
         admin_dashboard()
+
