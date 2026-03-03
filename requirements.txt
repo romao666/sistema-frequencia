@@ -5,6 +5,6 @@ psycopg2-binary
 sqlalchemy
 qrcode[pil]
 jinja2
-libgdk-pixbuf-2.0-0
 weasyprint
+
 
