@@ -145,13 +145,16 @@ def obter_proxima_versao(matricula, vinculo, mes, ano):
     id_unico = f"{matricula}_{vinculo}_{mes}_{ano}"
     df = run_query("SELECT versao_atual FROM versoes_folha WHERE id_unico = ?", (id_unico,), fetch=True)
     
+    if not isinstance(df, pd.DataFrame):
+        df = pd.DataFrame()
+
     if not df.empty:
         nova_versao = int(df.iloc[0]['versao_atual']) + 1
-        run_query("UPDATE versoes_folha SET versao_atual = ? WHERE id_unico = ?", (nova_versao, id_unico))
+        _ok, _msg = run_query("UPDATE versoes_folha SET versao_atual = ? WHERE id_unico = ?", (nova_versao, id_unico))
         return nova_versao
     else:
         nova_versao = 1
-        run_query("INSERT INTO versoes_folha VALUES (?, ?, ?, ?, ?, ?)", (id_unico, matricula, vinculo, mes, ano, nova_versao))
+        _ok, _msg = run_query("INSERT INTO versoes_folha VALUES (?, ?, ?, ?, ?, ?)", (id_unico, matricula, vinculo, mes, ano, nova_versao))
         return nova_versao
 
 def import_csv_to_db(df):
